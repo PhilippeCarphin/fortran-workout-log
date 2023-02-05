@@ -50,6 +50,9 @@ And after that I've parsed =exercise.json= into an instance of =Exercise=:
 #+end_src
 
 Writing the first subroutine: =parse_set_test= (error handling removed)
+#+begin_src json
+{ "weight": 3.14, "reps"  : 15 }
+#+end_src
 
 #+begin_src fortran
         SUBROUTINE parse_set_test(ierr)
@@ -69,11 +72,20 @@ Writing the first subroutine: =parse_set_test= (error handling removed)
             ierr = 0
         END SUBROUTINE
 #+end_src
+did not take too long since we are getting toplevel values of toplevel keys
+out of the file.
 
 Then it took a bit of extra learning to get things deeper in the file to
 parse =exercise.json=.  Instead of getting native values straight from the
 =json_file= object, I had to get a =json_value= from the file and get things
 out of the json value.
+
+#+begin_src json
+{ "info": {"name": "overhead press", "group": "shoulders"},
+  "sets": [ { "weight": 1.11, "reps"  : 10 },
+            { "weight": 2.22, "reps"  : 20 },
+            { "weight": 3.33, "reps"  : 30 }]}
+#+end_src
 
 #+begin_src fortran
         SUBROUTINE parse_exercise_test(ierr)
