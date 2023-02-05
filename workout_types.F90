@@ -15,4 +15,20 @@ MODULE workout_types
         TYPE(ExerciseSet), dimension(:), ALLOCATABLE :: sets
     END TYPE
 
+    TYPE :: WorkoutInfo
+        character(len=:), ALLOCATABLE :: name
+        character(len=:), ALLOCATABLE :: main_group
+    END TYPE
+
+    TYPE :: Workout
+        TYPE(WorkoutInfo) :: info
+        TYPE(Exercise), dimension(:), ALLOCATABLE :: exericses
+    END TYPE
+
+    TYPE :: WorkoutHistory
+        TYPE(Workout), dimension(:), ALLOCATABLE :: workouts
+        TYPE(Workout) :: ongoing_workout
+        LOGICAL :: has_ongoing_workout
+    END TYPE
+
 END MODULE
