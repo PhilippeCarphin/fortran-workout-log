@@ -63,9 +63,6 @@ MODULE workout
             integer, intent(out) :: ierr
             LOGICAL :: found
 
-            integer :: nb_sets, iset
-            TYPE(ExerciseSet) :: es
-
             type(json_file) :: json
             type(json_value), pointer :: p
             type(json_value), pointer :: jsets
@@ -119,20 +116,13 @@ MODULE workout
                 return
             endif
 
-            call jcore%info(jsets, n_children=nb_sets)
-            write(error_unit,*) "Number of sets = ", nb_sets
-            ALLOCATE(exercise%sets(1:3))
+            call parse_exercise_sets(jsets, exercise%sets, ierr)
+            if(ierr .ne. 0) then
+                write(error_unit,*) "Failure in parse_exercise_sets()"
+                ierr = 1
+                return
+            endif
 
-            do iset = 1, nb_sets
-                call jcore%get_child(jsets, iset, p, found)
-                call parse_set(p, exercise%sets(iset), ierr)
-                if(ierr .ne. 0) then
-                    write(error_unit,*) "Parsing set #", iset, "FAILED"
-                    deallocate(exercise%sets)
-                    ierr = 1
-                    return
-                endif
-            end do
             call print_exercise(error_unit, exercise)
             ierr = 0
         END SUBROUTINE
@@ -200,4 +190,32 @@ MODULE workout
             end do
 
         END SUBROUTINE
+
+        SUBROUTINE parse_exercise_sets(jsets, ess, ierr)
+            type(json_value), pointer :: jsets
+            TYPE(ExerciseSet), dimension(:), ALLOCATABLE :: ess
+            integer, intent(out) :: ierr
+
+            integer :: nb_sets, iset
+            type(json_core) :: jcore
+            type(json_value), pointer :: p
+            LOGICAL :: found
+
+            call jcore%info(jsets, n_children=nb_sets)
+
+            write(error_unit,*) "Number of sets = ", nb_sets
+            ALLOCATE(ess(1:nb_sets))
+
+            do iset = 1, nb_sets
+                call jcore%get_child(jsets, iset, p, found)
+                call parse_set(p, ess(iset), ierr)
+                if(ierr .ne. 0) then
+                    write(error_unit,*) "Parsing set #", iset, "FAILED"
+                    deallocate(ess)
+                    ierr = 1
+                    return
+                endif
+            end do
+            ierr = 0
+        end SUBROUTINE
 END
