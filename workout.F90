@@ -19,7 +19,6 @@ MODULE workout
             TYPE(ExerciseSet) :: es
 
             type(json_file) :: jfile
-            type(json_value), pointer :: p
             type(json_core) :: jcore
 
             character(len=*), parameter :: dir = "../"
@@ -64,8 +63,7 @@ MODULE workout
             LOGICAL :: found
 
             type(json_file) :: jfile
-            type(json_value), pointer :: p
-            type(json_value), pointer :: jsets
+            type(json_value), pointer :: jeinfo, jsets
             type(json_core) :: jcore
             TYPE(Exercise) :: exercise
 
@@ -95,14 +93,14 @@ MODULE workout
             ! TYPE(json_core) object.
             ! call json%get_core(jcore)
 
-            call jfile%get("info", p, found)
+            call jfile%get("info", jeinfo, found)
             if( .not. found) then
                 write(error_unit,*) "Info not found"
                 ierr = 1
                 return
             endif
 
-            call parse_exercise_info(p, exercise%info, ierr)
+            call parse_exercise_info(jeinfo, exercise%info, ierr)
             if(ierr .ne. 0) then
                 write(error_unit,*) "Failure in parse_exercise_info()"
                 ierr = 1
@@ -198,7 +196,7 @@ MODULE workout
 
             integer :: nb_sets, iset
             type(json_core) :: jcore
-            type(json_value), pointer :: p
+            type(json_value), pointer :: jset
             LOGICAL :: found
 
             call jcore%info(jsets, n_children=nb_sets)
@@ -207,8 +205,8 @@ MODULE workout
             ALLOCATE(ess(1:nb_sets))
 
             do iset = 1, nb_sets
-                call jcore%get_child(jsets, iset, p, found)
-                call parse_set(p, ess(iset), ierr)
+                call jcore%get_child(jsets, iset, jset, found)
+                call parse_set(jset, ess(iset), ierr)
                 if(ierr .ne. 0) then
                     write(error_unit,*) "Parsing set #", iset, "FAILED"
                     deallocate(ess)
