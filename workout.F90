@@ -1,4 +1,4 @@
-MODULE workout
+MODULE workout_history
     use json_module
     use, intrinsic :: iso_fortran_env
     use workout_types
@@ -216,4 +216,165 @@ MODULE workout
             end do
             ierr = 0
         end SUBROUTINE
+
+        SUBROUTINE parse_workout_test(ierr)
+            integer, intent(out) :: ierr
+            LOGICAL :: found
+
+            TYPE(Workout) :: w
+
+            type(json_file) :: jfile
+            type(json_value), pointer :: jwinfo, jexcs
+            type(json_core) :: jcore
+
+            character(len=*), parameter :: dir = "../"
+            character(len=*), parameter :: filename = "workout.json"
+            call jfile%initialize()
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
+                ierr = 1
+                return
+            endif
+
+            call jfile%load(dir//filename)
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
+                ierr = 1
+                return
+            endif
+
+            call jfile%get('info', jwinfo, found)
+            if(.not. found) then
+                write(error_unit,*) "parse_workout_test(): info not found"
+                ierr = 1
+                return
+            endif
+
+            call parse_workout_info(jwinfo, w%info, ierr)
+            if(ierr .ne. 0) then
+                write(error_unit,*) "Failure in parse_workout_info()"
+                ierr = 1
+                return
+            endif
+
+            call jfile%get('exercises', jexcs, found)
+            if(.not. found) then
+                write(error_unit,*) "parse_workout_test(): exercises not found"
+                ierr = 1
+                return
+            endif
+
+            call parse_exercises(jexcs, w%exercises, ierr)
+            if(ierr .ne. 0) then
+                write(error_unit,*) "Failure in parse_exercises()"
+                ierr = 1
+                return
+            endif
+
+            call print_workout(w)
+            ierr = 0
+        END SUBROUTINE
+
+        SUBROUTINE parse_workout_info(jwinfo, wi, ierr)
+            type(json_value), pointer :: jwinfo
+            type(WorkoutInfo) :: wi
+            integer, intent(out) :: ierr
+
+            type(json_core) :: jcore
+            logical :: found
+
+            call jcore%get(jwinfo, 'date', wi%date, found)
+            if(.not. found) then
+                write(error_unit,*) "parse_workout_info(): date not found"
+                ierr = 1
+                return
+            endif
+
+            call jcore%get(jwinfo, 'main_group', wi%main_group, found)
+            if(.not. found) then
+                write(error_unit,*) "parse_workout_info(): main_group not found"
+                ierr = 1
+                return
+            endif
+
+            ierr = 0
+        END SUBROUTINE
+        SUBROUTINE parse_exercise(jexc, exc, ierr)
+            type(json_value), pointer :: jexc
+            TYPE(Exercise) :: exc
+            integer, intent(out) :: ierr
+
+            type(json_core) :: jcore
+            type(json_value), pointer :: jeinfo, jsets
+            LOGICAL :: found
+            call jcore%get(jexc, 'info', jeinfo, found)
+            if(.not. found) then
+                write(error_unit,*) "parse_exercise(): info not found"
+                ierr = 1
+                return
+            endif
+
+            call parse_exercise_info(jeinfo, exc%info, ierr)
+            if(ierr .ne. 0) then
+                write(error_unit,*) "parse_exercise(): failure in parse_exercise_info()"
+                ierr = 1
+                return
+            endif
+
+            call jcore%get(jexc, 'sets', jsets, found)
+            if(.not. found) then
+                write(error_unit,*) "parse_exercise(): sets not found"
+                ierr = 1
+                return
+            endif
+
+            call parse_exercise_sets(jsets, exc%sets, ierr)
+            if(ierr .ne. 0) then
+                write(error_unit,*) "parse_exercise(): failure in parse_exercise_sets()"
+                ierr = 1
+                return
+            endif
+
+        END SUBROUTINE
+
+        SUBROUTINE parse_exercises(jexcs, excs, ierr)
+            type(json_value), pointer :: jexcs
+            TYPE(Exercise), dimension(:), ALLOCATABLE :: excs
+            integer, intent(out) :: ierr
+
+            integer :: nb_excs, iexc
+            type(json_core) :: jcore
+            type(json_value), pointer :: jexc
+            LOGICAL :: found
+
+            call jcore%info(jexcs, n_children=nb_excs)
+
+            write(error_unit,*) "Number of exercises = ", nb_excs
+            ALLOCATE(excs(1:nb_excs))
+
+            do iexc = 1, nb_excs
+                call jcore%get_child(jexcs, iexc, jexc, found)
+                call parse_exercise(jexc, excs(iexc), ierr)
+                if(ierr .ne. 0) then
+                    write(error_unit,*) "Parsing exercise #", iexc, "FAILED"
+                    deallocate(excs)
+                    ierr = 1
+                    return
+                endif
+            end do
+            ierr = 0
+        end SUBROUTINE
+        SUBROUTINE print_workout(w)
+            TYPE(Workout) :: w
+
+            integer :: iex
+
+            write(error_unit,*) "============================================"
+
+            write(error_unit,*) "Workout on "//w%info%date//" for "//w%info%main_group
+
+            do iex=1,size(w%exercises,1)
+                call print_exercise(error_unit, w%exercises(iex))
+            end do
+        END SUBROUTINE
 END

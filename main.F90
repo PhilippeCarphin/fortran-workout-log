@@ -1,6 +1,6 @@
 PROGRAM main
     use iso_fortran_env
-    use workout
+    use workout_history
     integer :: ierr
 
     write(error_unit,*) "Hello world"
@@ -10,5 +10,8 @@ PROGRAM main
 
     call parse_exercise_test(ierr)
     write(error_unit,*) "parse_exercise_test() :", ierr
+
+    call parse_workout_test(ierr)
+    write(error_unit,*) "parse_workout_test() :", ierr
 
 END

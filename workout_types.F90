@@ -16,13 +16,13 @@ MODULE workout_types
     END TYPE
 
     TYPE :: WorkoutInfo
-        character(len=:), ALLOCATABLE :: name
+        character(len=:), ALLOCATABLE :: date
         character(len=:), ALLOCATABLE :: main_group
     END TYPE
 
     TYPE :: Workout
         TYPE(WorkoutInfo) :: info
-        TYPE(Exercise), dimension(:), ALLOCATABLE :: exericses
+        TYPE(Exercise), dimension(:), ALLOCATABLE :: exercises
     END TYPE
 
     TYPE :: WorkoutHistory
