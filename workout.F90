@@ -224,7 +224,7 @@ MODULE workout_history
             TYPE(Workout) :: w
 
             type(json_file) :: jfile
-            type(json_value), pointer :: jwinfo, jexcs
+            type(json_value), pointer :: jwinfo, jexcs, jw
             type(json_core) :: jcore
 
             character(len=*), parameter :: dir = "../"
@@ -243,30 +243,10 @@ MODULE workout_history
                 return
             endif
 
-            call jfile%get('info', jwinfo, found)
-            if(.not. found) then
-                write(error_unit,*) "parse_workout_test(): info not found"
-                ierr = 1
-                return
-            endif
-
-            call parse_workout_info(jwinfo, w%info, ierr)
+            call jfile%get(jw)
+            call parse_workout(jw, w, ierr)
             if(ierr .ne. 0) then
-                write(error_unit,*) "Failure in parse_workout_info()"
-                ierr = 1
-                return
-            endif
-
-            call jfile%get('exercises', jexcs, found)
-            if(.not. found) then
-                write(error_unit,*) "parse_workout_test(): exercises not found"
-                ierr = 1
-                return
-            endif
-
-            call parse_exercises(jexcs, w%exercises, ierr)
-            if(ierr .ne. 0) then
-                write(error_unit,*) "Failure in parse_exercises()"
+                write(error_unit,*) "Failure in parse_workout()"
                 ierr = 1
                 return
             endif
@@ -376,5 +356,43 @@ MODULE workout_history
             do iex=1,size(w%exercises,1)
                 call print_exercise(error_unit, w%exercises(iex))
             end do
+        END SUBROUTINE
+        SUBROUTINE parse_workout(jw, w, ierr)
+
+            type(json_value), pointer :: jw
+            type(Workout) :: w
+            integer :: ierr
+
+            type(json_core) :: jcore
+            type(json_value), pointer :: jwinfo, jexcs
+            logical :: found
+
+            call jcore%get(jw, 'info', jwinfo, found)
+            if(.not. found) then
+                write(error_unit,*) "parse_workout_test(): info not found"
+                ierr = 1
+                return
+            endif
+
+            call parse_workout_info(jwinfo, w%info, ierr)
+            if(ierr .ne. 0) then
+                write(error_unit,*) "Failure in parse_workout_info()"
+                ierr = 1
+                return
+            endif
+
+            call jcore%get(jw, 'exercises', jexcs, found)
+            if(.not. found) then
+                write(error_unit,*) "parse_workout_test(): exercises not found"
+                ierr = 1
+                return
+            endif
+
+            call parse_exercises(jexcs, w%exercises, ierr)
+            if(ierr .ne. 0) then
+                write(error_unit,*) "Failure in parse_exercises()"
+                ierr = 1
+                return
+            endif
         END SUBROUTINE
 END
