@@ -38,7 +38,6 @@ MODULE workout
                 return
             endif
 
-            call json%get_core(jcore)
             call json%get('weight', es%weight, found)
             if( .not. found) then
                 write(error_unit,*) "Weight not found"
@@ -90,7 +89,14 @@ MODULE workout
                 return
             endif
 
-            call json%get_core(jcore)
+            ! This was in the example that I first followed, but now
+            ! it seems the jcore is just a means of accessing core
+            ! functions and the instance itself is irrelevant
+            ! Example first followed: https://journal.fluidnumerics.com/json-fortran-a-modern-tool-for-modern-fortran-developers
+            ! Documentation: http://jacobwilliams.github.io/json-fortran/type/json_core.html#boundprocedure-get_child
+            ! The example from the doc only says you have to declare a
+            ! TYPE(json_core) object.
+            ! call json%get_core(jcore)
 
             call json%get("info", p, found)
             if( .not. found) then
@@ -99,7 +105,7 @@ MODULE workout
                 return
             endif
 
-            call parse_exercise_info(jcore, p, exercise%info, ierr)
+            call parse_exercise_info(p, exercise%info, ierr)
             if(ierr .ne. 0) then
                 write(error_unit,*) "Failure in parse_exercise_info()"
                 ierr = 1
@@ -119,7 +125,7 @@ MODULE workout
 
             do iset = 1, nb_sets
                 call jcore%get_child(jsets, iset, p, found)
-                call parse_set(jcore, p, exercise%sets(iset), ierr)
+                call parse_set(p, exercise%sets(iset), ierr)
                 if(ierr .ne. 0) then
                     write(error_unit,*) "Parsing set #", iset, "FAILED"
                     deallocate(exercise%sets)
@@ -131,14 +137,14 @@ MODULE workout
             ierr = 0
         END SUBROUTINE
 
-        SUBROUTINE parse_set(jcore, jset, es, ierr)
+        SUBROUTINE parse_set(jset, es, ierr)
 
             implicit none
-            type(json_core) :: jcore
             type(json_value), pointer :: jset
             TYPE(ExerciseSet), intent(out) :: es
             integer, intent(out) :: ierr
 
+            type(json_core) :: jcore
             LOGICAL :: found
 
             call jcore%get(jset, 'weight', es%weight, found)
@@ -157,12 +163,12 @@ MODULE workout
             ierr = 0
         END SUBROUTINE
 
-        SUBROUTINE parse_exercise_info(jcore, jeinfo, ei, ierr)
-            type(json_core) :: jcore
+        SUBROUTINE parse_exercise_info(jeinfo, ei, ierr)
             type(json_value), pointer :: jeinfo
             TYPE(ExerciseInfo), intent(out) :: ei
             integer, intent(out) :: ierr
 
+            type(json_core) :: jcore
             LOGICAL :: found
 
             call jcore%get(jeinfo, 'name', ei%name, found)
