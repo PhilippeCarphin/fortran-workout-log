@@ -18,34 +18,34 @@ MODULE workout
 
             TYPE(ExerciseSet) :: es
 
-            type(json_file) :: json
+            type(json_file) :: jfile
             type(json_value), pointer :: p
             type(json_core) :: jcore
 
             character(len=*), parameter :: dir = "../"
             character(len=*), parameter :: filename = "exercise_set.json"
-            call json%initialize()
-            if (json%failed()) then
-                call json%print_error_message(error_unit)
+            call jfile%initialize()
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
                 ierr = 1
                 return
             endif
 
-            call json%load(dir//filename)
-            if (json%failed()) then
-                call json%print_error_message(error_unit)
+            call jfile%load(dir//filename)
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
                 ierr = 1
                 return
             endif
 
-            call json%get('weight', es%weight, found)
+            call jfile%get('weight', es%weight, found)
             if( .not. found) then
                 write(error_unit,*) "Weight not found"
                 ierr = 1
                 return
             endif
 
-            call json%get('reps', es%reps, found)
+            call jfile%get('reps', es%reps, found)
             if( .not. found) then
                 write(error_unit,*) "Reps not found"
                 ierr = 1
@@ -63,7 +63,7 @@ MODULE workout
             integer, intent(out) :: ierr
             LOGICAL :: found
 
-            type(json_file) :: json
+            type(json_file) :: jfile
             type(json_value), pointer :: p
             type(json_value), pointer :: jsets
             type(json_core) :: jcore
@@ -72,16 +72,16 @@ MODULE workout
             character(len=*), parameter :: dir = "../"
             character(len=*), parameter :: filename = "exercise.json"
 
-            call json%initialize()
-            if (json%failed()) then
-                call json%print_error_message(error_unit)
+            call jfile%initialize()
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
                 ierr = 1
                 return
             endif
 
-            call json%load(dir//filename)
-            if (json%failed()) then
-                call json%print_error_message(error_unit)
+            call jfile%load(dir//filename)
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
                 ierr = 1
                 return
             endif
@@ -95,7 +95,7 @@ MODULE workout
             ! TYPE(json_core) object.
             ! call json%get_core(jcore)
 
-            call json%get("info", p, found)
+            call jfile%get("info", p, found)
             if( .not. found) then
                 write(error_unit,*) "Info not found"
                 ierr = 1
@@ -109,7 +109,7 @@ MODULE workout
                 return
             endif
 
-            call json%get('sets', jsets, found)
+            call jfile%get('sets', jsets, found)
             if( .not. found) then
                 write(error_unit,*) "Sets not found"
                 ierr = 1
