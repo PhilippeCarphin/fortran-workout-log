@@ -1,0 +1,8 @@
+{
+    "info": {"name": "overhead press", "group": "shoulders"},
+    "sets": [
+        { "weight": 1.11, "reps"  : 10 },
+        { "weight": 2.22, "reps"  : 20 },
+        { "weight": 3.33, "reps"  : 30 }
+    ]
+}

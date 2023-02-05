@@ -8,4 +8,7 @@ PROGRAM main
     call parse_set_test(ierr)
     write(error_unit,*) "parse_set_test() :", ierr
 
+    call parse_exercise_test(ierr)
+    write(error_unit,*) "parse_exercise_test() :", ierr
+
 END
