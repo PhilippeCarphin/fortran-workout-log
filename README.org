@@ -1,0 +1,106 @@
+#+TITLE: Fortran workout log
+
+This is a rewrite in Fortran of my
+[[https://github.com/philippecarphin/rust-workout-log][rust-workout-log]]
+
+Since I'm doing Fotran at my workplace at the Canadian Meteorological Center,
+I decided try to reimplement it in Fortran as practice.
+
+* How it works
+
+The workout history is a set of workouts, a workout is a set of exercises and
+metadata, an exercise is a set or exercise sets and metadata, and an exercise
+set is a weight and a number of reps.
+
+This data is stored in JSON format.
+
+As with [[https://github.com/philippecarphin/c-workout-log][c-workout-log]] a
+good amount of code needs to be written to get the data from the JSON file to
+native "derived types" (Fotran's structs).
+
+I use the library
+[[https://github.com/jacobwilliams/json-fortran.git][json-fortran]] which is
+a fork of [[https://github.com/josephalevin/fson][FSON]] that incorporates object
+oriented and other nice features from Fortran 2000 and 2003 standards.
+
+* So far
+
+I've figured out how to use the json-fortran library.  It wasn't that hard to
+figure out.  With that, I've parsed the files =exercise_set.json= into an
+instance of =ExerciseSet=:
+
+#+begin_src fortran
+    TYPE :: ExerciseSet
+        real :: weight
+        integer :: reps
+    END TYPE
+#+end_src
+
+And after that I've parsed =exercise.json= into an instance of =Exercise=:
+#+begin_src fortran
+    TYPE :: ExerciseInfo
+        character(len=:), ALLOCATABLE :: name
+        character(len=:), ALLOCATABLE :: group
+    END TYPE
+
+    TYPE :: Exercise
+        TYPE(ExerciseInfo) :: info
+        TYPE(ExerciseSet), dimension(:), ALLOCATABLE :: sets
+    END TYPE
+#+end_src
+
+Writing the first subroutine: =parse_set_test= (error handling removed)
+
+#+begin_src fortran
+        SUBROUTINE parse_set_test(ierr)
+            implicit none
+            integer, intent(out) :: ierr
+            LOGICAL :: found
+            TYPE(ExerciseSet) :: es
+            type(json_file) :: jfile
+            type(json_value), pointer :: p
+            type(json_core) :: jcore
+
+            call jfile%initialize()
+            call jfile%load("../exercise_set.json")
+            call jfile%get('weight', es%weight, found)
+            call jfile%get('reps', es%reps, found)
+            write(error_unit,*) "weight: ", es%weight, "reps: ", es%reps
+            ierr = 0
+        END SUBROUTINE
+#+end_src
+
+Then it took a bit of extra learning to get things deeper in the file to
+parse =exercise.json=.  Instead of getting native values straight from the
+=json_file= object, I had to get a =json_value= from the file and get things
+out of the json value.
+
+#+begin_src fortran
+        SUBROUTINE parse_exercise_test(ierr)
+            implicit none
+            integer, intent(out) :: ierr
+            LOGICAL :: found
+
+            type(json_file) :: jfile
+            type(json_value), pointer :: jeinfo, jsets, jset
+            type(json_core) :: jcore
+
+            integer :: iset, nb_sets
+            TYPE(Exercise) :: exercise
+
+            call jfile%initialize()
+            call jfile%load("../exercise.json")
+            call jfile%get("info", jeinfo, found)
+            call jcore%get(jeinfo, 'name', exercise%info%name, found)
+            call jcore%get(jeinfo, 'group', exercise%info%group, found)
+
+            call jfile%get("sets", jsets, found)
+            call jcore%info(jsets, n_children=nb_sets)
+            allocate(exercise%sets(1:nb_sets))
+            do iset = 1, nb_sets
+                call jcore%get_child(jsets, iset, jset, found)
+                call jcore%get(jset, 'weight', exercise%sets(iset)%weight, found)
+                call jcore%get(jset, 'reps', exercise%sets(iset)%reps, found)
+            end do
+        END SUBROUTINE
+#+end_src
