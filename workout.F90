@@ -368,35 +368,16 @@ MODULE workout_history
 
             TYPE(WorkoutHistory) :: wh
 
-            type(json_file) :: jfile
-            type(json_value), pointer :: jwh
-            type(json_core) :: jcore
-            LOGICAL :: found
-
             character(len=*), parameter :: dir = "../"
             character(len=*), parameter :: filename = "workout_history.json"
-            call jfile%initialize()
-            if (jfile%failed()) then
-                call jfile%print_error_message(error_unit)
-                ierr = 1
-                return
-            endif
 
-            call jfile%load(dir//filename)
-            if (jfile%failed()) then
-                call jfile%print_error_message(error_unit)
-                ierr = 1
-                return
-            endif
-
-            call jfile%get(jwh)
-
-            call parse_workout_history(jwh, wh, ierr)
+            call load_workout_history_file(dir//filename, wh, ierr)
             if(ierr .ne. 0) then
-                write(error_unit,*) "Error in parse_workout_history"
+                write(error_unit,*) "Error in load_workout_history_file()"
                 ierr = 1
                 return
             endif
+
             call print_workout_history(wh)
 
             ierr = 0
@@ -440,4 +421,40 @@ MODULE workout_history
             enddo
         END SUBROUTINE
 
+        SUBROUTINE load_workout_history_file(filename, wh, ierr)
+            character(len=*) :: filename
+            TYPE(workoutHistory) :: wh
+            integer :: ierr
+
+            type(json_value), pointer :: jwh
+            type(json_file) :: jfile
+
+            call jfile%initialize()
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
+                ierr = 1
+                return
+            endif
+
+            call jfile%load(filename)
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
+                ierr = 1
+                return
+            endif
+
+            call jfile%get(jwh)
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
+                ierr = 1
+                return
+            endif
+
+            call parse_workout_history(jwh, wh, ierr)
+            if(ierr .ne. 0) then
+                write(error_unit,*) "Could not parse workout history"
+                ierr = 1
+                return
+            endif
+        END SUBROUTINE
 END
