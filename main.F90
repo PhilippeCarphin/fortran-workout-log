@@ -14,4 +14,6 @@ PROGRAM main
     call parse_workout_test(ierr)
     write(error_unit,*) "parse_workout_test() :", ierr
 
+    call parse_workout_history_test(ierr)
+    write(error_unit,*) "parse_workout_history_test() :", ierr
 END

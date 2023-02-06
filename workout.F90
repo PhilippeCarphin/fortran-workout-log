@@ -395,4 +395,81 @@ MODULE workout_history
                 return
             endif
         END SUBROUTINE
+        SUBROUTINE parse_workout_history_test(ierr)
+            integer, intent(out) :: ierr
+
+            TYPE(WorkoutHistory) :: wh
+
+            type(json_file) :: jfile
+            type(json_value), pointer :: jwh
+            type(json_core) :: jcore
+            LOGICAL :: found
+
+            character(len=*), parameter :: dir = "../"
+            character(len=*), parameter :: filename = "workout_history.json"
+            call jfile%initialize()
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
+                ierr = 1
+                return
+            endif
+
+            call jfile%load(dir//filename)
+            if (jfile%failed()) then
+                call jfile%print_error_message(error_unit)
+                ierr = 1
+                return
+            endif
+
+            call jfile%get(jwh)
+
+            call parse_workout_history(jwh, wh, ierr)
+            if(ierr .ne. 0) then
+                write(error_unit,*) "Error in parse_workout_history"
+                ierr = 1
+                return
+            endif
+            call print_workout_history(wh)
+
+            ierr = 0
+        END SUBROUTINE
+        SUBROUTINE parse_workout_history(jwh, wh, ierr)
+            type(json_value), pointer :: jwh
+            type(workoutHistory) :: wh
+            integer, intent(out) :: ierr
+
+            type(json_core) :: jcore
+            type(json_value), pointer :: jws, jw
+            integer :: nb_workouts, iw
+            logical :: found
+
+            call jcore%get(jwh, 'workouts', jws, found)
+            if(.not. found) then
+                write(error_unit, *) "parse_workout_history(): workouts not found"
+                ierr = 1
+                return
+            endif
+
+            call jcore%info(jws, n_children=nb_workouts)
+            allocate(wh%workouts(1:nb_workouts))
+            do iw=1,nb_workouts
+                call jcore%get_child(jws, iw, jw, found)
+                call parse_workout(jw, wh%workouts(iw), ierr)
+                if(ierr .ne. 0) then
+                    write(error_unit,*) "parse_workout_history() error parsing workout #", iw
+                    ierr = 1
+                    return
+                endif
+            enddo
+        END SUBROUTINE
+
+        SUBROUTINE print_workout_history(wh)
+            TYPE(WorkoutHistory) :: wh
+            integer :: iw
+
+            do iw=1,size(wh%workouts, 1)
+                call print_workout(wh%workouts(iw))
+            enddo
+        END SUBROUTINE
+
 END
