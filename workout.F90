@@ -17,6 +17,7 @@ MODULE workout_history
             LOGICAL :: found
 
             TYPE(ExerciseSet) :: es
+            TYPE(json_value), pointer :: jset
 
             type(json_file) :: jfile
             type(json_core) :: jcore
@@ -37,16 +38,11 @@ MODULE workout_history
                 return
             endif
 
-            call jfile%get('weight', es%weight, found)
-            if( .not. found) then
-                write(error_unit,*) "Weight not found"
-                ierr = 1
-                return
-            endif
+            call jfile%get(jset)
 
-            call jfile%get('reps', es%reps, found)
-            if( .not. found) then
-                write(error_unit,*) "Reps not found"
+            call parse_set(jset, es, ierr)
+            if(ierr .ne. 0) then
+                write(error_unit,*) "Error parsing json set"
                 ierr = 1
                 return
             endif
@@ -63,9 +59,9 @@ MODULE workout_history
             LOGICAL :: found
 
             type(json_file) :: jfile
-            type(json_value), pointer :: jeinfo, jsets
+            type(json_value), pointer :: jexc
             type(json_core) :: jcore
-            TYPE(Exercise) :: exercise
+            TYPE(Exercise) :: exc
 
             character(len=*), parameter :: dir = "../"
             character(len=*), parameter :: filename = "exercise.json"
@@ -84,44 +80,16 @@ MODULE workout_history
                 return
             endif
 
-            ! This was in the example that I first followed, but now
-            ! it seems the jcore is just a means of accessing core
-            ! functions and the instance itself is irrelevant
-            ! Example first followed: https://journal.fluidnumerics.com/json-fortran-a-modern-tool-for-modern-fortran-developers
-            ! Documentation: http://jacobwilliams.github.io/json-fortran/type/json_core.html#boundprocedure-get_child
-            ! The example from the doc only says you have to declare a
-            ! TYPE(json_core) object.
-            ! call json%get_core(jcore)
+            call jfile%get(jexc)
 
-            call jfile%get("info", jeinfo, found)
-            if( .not. found) then
-                write(error_unit,*) "Info not found"
-                ierr = 1
-                return
-            endif
-
-            call parse_exercise_info(jeinfo, exercise%info, ierr)
+            call parse_exercise(jexc, exc, ierr)
             if(ierr .ne. 0) then
-                write(error_unit,*) "Failure in parse_exercise_info()"
+                write(error_unit,*) "Error parsing exercise"
                 ierr = 1
                 return
             endif
 
-            call jfile%get('sets', jsets, found)
-            if( .not. found) then
-                write(error_unit,*) "Sets not found"
-                ierr = 1
-                return
-            endif
-
-            call parse_exercise_sets(jsets, exercise%sets, ierr)
-            if(ierr .ne. 0) then
-                write(error_unit,*) "Failure in parse_exercise_sets()"
-                ierr = 1
-                return
-            endif
-
-            call print_exercise(error_unit, exercise)
+            call print_exercise(error_unit, exc)
             ierr = 0
         END SUBROUTINE
 
