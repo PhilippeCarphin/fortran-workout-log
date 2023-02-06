@@ -6,102 +6,13 @@ MODULE workout_history
 
     CONTAINS
 
-        SUBROUTINE workout_hello()
-            use iso_fortran_env
-            write(error_unit,*) "Workout hello"
-        END SUBROUTINE
-
-        SUBROUTINE parse_set_test(ierr)
-            implicit none
-            integer, intent(out) :: ierr
-            LOGICAL :: found
-
-            TYPE(ExerciseSet) :: es
-            TYPE(json_value), pointer :: jset
-
-            type(json_file) :: jfile
-            type(json_core) :: jcore
-
-            character(len=*), parameter :: dir = "../"
-            character(len=*), parameter :: filename = "exercise_set.json"
-            call jfile%initialize()
-            if (jfile%failed()) then
-                call jfile%print_error_message(error_unit)
-                ierr = 1
-                return
-            endif
-
-            call jfile%load(dir//filename)
-            if (jfile%failed()) then
-                call jfile%print_error_message(error_unit)
-                ierr = 1
-                return
-            endif
-
-            call jfile%get(jset)
-
-            call parse_set(jset, es, ierr)
-            if(ierr .ne. 0) then
-                write(error_unit,*) "Error parsing json set"
-                ierr = 1
-                return
-            endif
-
-            write(error_unit,*) "weight: ", es%weight, "reps: ", es%reps
-
-            ierr = 0
-
-        END SUBROUTINE
-
-        SUBROUTINE parse_exercise_test(ierr)
-            implicit none
-            integer, intent(out) :: ierr
-            LOGICAL :: found
-
-            type(json_file) :: jfile
-            type(json_value), pointer :: jexc
-            type(json_core) :: jcore
-            TYPE(Exercise) :: exc
-
-            character(len=*), parameter :: dir = "../"
-            character(len=*), parameter :: filename = "exercise.json"
-
-            call jfile%initialize()
-            if (jfile%failed()) then
-                call jfile%print_error_message(error_unit)
-                ierr = 1
-                return
-            endif
-
-            call jfile%load(dir//filename)
-            if (jfile%failed()) then
-                call jfile%print_error_message(error_unit)
-                ierr = 1
-                return
-            endif
-
-            call jfile%get(jexc)
-
-            call parse_exercise(jexc, exc, ierr)
-            if(ierr .ne. 0) then
-                write(error_unit,*) "Error parsing exercise"
-                ierr = 1
-                return
-            endif
-
-            call print_exercise(error_unit, exc)
-            ierr = 0
-        END SUBROUTINE
-
         SUBROUTINE parse_set(jset, es, ierr)
-
-            implicit none
-            type(json_value), pointer :: jset
-            TYPE(ExerciseSet), intent(out) :: es
-            integer, intent(out) :: ierr
+            type(json_value), intent(in), pointer :: jset
+            TYPE(ExerciseSet), intent(out)        :: es
+            integer, intent(out)                  :: ierr
 
             type(json_core) :: jcore
-            LOGICAL :: found
+            LOGICAL         :: found
 
             call jcore%get(jset, 'weight', es%weight, found)
             if( .not. found) then
@@ -109,6 +20,7 @@ MODULE workout_history
                 ierr = 1
                 return
             endif
+
             call jcore%get(jset, 'reps', es%reps, found)
             if( .not. found) then
                 write(error_unit,*) "parse_set(): Reps not found"
@@ -169,7 +81,6 @@ MODULE workout_history
 
             call jcore%info(jsets, n_children=nb_sets)
 
-            write(error_unit,*) "Number of sets = ", nb_sets
             ALLOCATE(ess(1:nb_sets))
 
             do iset = 1, nb_sets
@@ -184,44 +95,6 @@ MODULE workout_history
             end do
             ierr = 0
         end SUBROUTINE
-
-        SUBROUTINE parse_workout_test(ierr)
-            integer, intent(out) :: ierr
-            LOGICAL :: found
-
-            TYPE(Workout) :: w
-
-            type(json_file) :: jfile
-            type(json_value), pointer :: jwinfo, jexcs, jw
-            type(json_core) :: jcore
-
-            character(len=*), parameter :: dir = "../"
-            character(len=*), parameter :: filename = "workout.json"
-            call jfile%initialize()
-            if (jfile%failed()) then
-                call jfile%print_error_message(error_unit)
-                ierr = 1
-                return
-            endif
-
-            call jfile%load(dir//filename)
-            if (jfile%failed()) then
-                call jfile%print_error_message(error_unit)
-                ierr = 1
-                return
-            endif
-
-            call jfile%get(jw)
-            call parse_workout(jw, w, ierr)
-            if(ierr .ne. 0) then
-                write(error_unit,*) "Failure in parse_workout()"
-                ierr = 1
-                return
-            endif
-
-            call print_workout(w)
-            ierr = 0
-        END SUBROUTINE
 
         SUBROUTINE parse_workout_info(jwinfo, wi, ierr)
             type(json_value), pointer :: jwinfo
@@ -297,7 +170,6 @@ MODULE workout_history
 
             call jcore%info(jexcs, n_children=nb_excs)
 
-            write(error_unit,*) "Number of exercises = ", nb_excs
             ALLOCATE(excs(1:nb_excs))
 
             do iexc = 1, nb_excs
@@ -363,25 +235,7 @@ MODULE workout_history
                 return
             endif
         END SUBROUTINE
-        SUBROUTINE parse_workout_history_test(ierr)
-            integer, intent(out) :: ierr
 
-            TYPE(WorkoutHistory) :: wh
-
-            character(len=*), parameter :: dir = "../"
-            character(len=*), parameter :: filename = "workout_history.json"
-
-            call load_workout_history_file(dir//filename, wh, ierr)
-            if(ierr .ne. 0) then
-                write(error_unit,*) "Error in load_workout_history_file()"
-                ierr = 1
-                return
-            endif
-
-            call print_workout_history(wh)
-
-            ierr = 0
-        END SUBROUTINE
         SUBROUTINE parse_workout_history(jwh, wh, ierr)
             type(json_value), pointer :: jwh
             type(workoutHistory) :: wh
