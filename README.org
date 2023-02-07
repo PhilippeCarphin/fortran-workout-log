@@ -6,6 +6,46 @@ This is a rewrite in Fortran of my
 Since I'm doing Fotran at my workplace at the Canadian Meteorological Center,
 I decided try to reimplement it in Fortran as practice.
 
+* Build
+
+This project depends on 
+[[https://github.com/jacobwilliams/json-fortran.git][json-fortran]] which is
+also built with CMake.
+
+#+begin_src sh
+# Get and build the json-fortran library
+cd <your choice>
+git clone https://github.com/jacobwilliams/json-fortran
+cd json-fortran ; mkdir build ; cd build
+jf_prefix=<your choice>  # reused in the CMake command for this repo
+cmake .. -DSKIP_DOC_GEN=TRUE -DCMAKE_INSTALL_PREFIX=${jf_prefix}
+make install
+
+# Get and build this repo
+cd <your choice>
+git clone https://github.com/philippecarphin/fortran-workout-log
+cd fortran-workout-log ; mkdir build ; cd build
+export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:${jf_prefix}
+cmake .. [-DCMAKE_INSTALL_PREFIX=<your choice>]
+make
+make check
+#+end_src
+
+For the curious, building and installing =json-fortran= will create a
+directory called =jsonfortran-gnu-8.3.0= in =${jf_prefix}= and the =gnu=
+comes from =${CMAKE_Fortran_COMPILER_ID}= to support multiple compilers.
+
+Because of this thing with supporting multiple compiliers, it's simpler
+to just add =${jf_prefix}= to =CMAKE_PREFIX_PATH= than to do the more classic
+=-D<name>_DIR=.  But if one so desired, they would need to do
+~-Djsonfortran-GNU_DIR=${jf_prefix}~ or replace GNU with the proper compiler
+ID.
+
+After running CMake for =fortran-workout-log=, the =CMAKE_PREFIX_PATH=
+variable is no longer necessary.  If you close your shell, you can come back
+to the build directory in a new shell and run =make=/=make check= without
+needing to redefine it.
+
 * How it works
 
 The workout history is a set of workouts, a workout is a set of exercises and
