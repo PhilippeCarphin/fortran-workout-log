@@ -3,7 +3,7 @@
 This is a rewrite in Fortran of my
 [[https://github.com/philippecarphin/rust-workout-log][rust-workout-log]]
 
-Since I'm doing Fotran at my workplace at the Canadian Meteorological Center,
+Since I'm doing Fortran at my workplace at the Canadian Meteorological Center,
 I decided try to reimplement it in Fortran as practice.
 
 * Build
