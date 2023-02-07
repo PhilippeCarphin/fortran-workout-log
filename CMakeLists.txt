@@ -16,7 +16,13 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 add_dependencies(check main)
 
 macro(add_parse_test name)
-    add_executable(parse_${name} tests/parse_${name}.F90)
+    add_executable(parse_${name} EXCLUDE_FROM_ALL tests/parse_${name}.F90)
+    # I used to bake the full of the input JSON file into
+    # the test executable this way but it caused a compiler
+    # error due to a too-long line so now I used WORKING_DIRECTORY
+    # instead.  Because of that, I can't do './parse_set' from the build
+    # directory but doing instead 'ctest --verbose -R parse_set' is
+    # not that bad
     target_compile_definitions(parse_${name} PRIVATE FILENAME=\"${name}.json\")
     target_link_libraries(parse_${name} PRIVATE workout)
     add_test(NAME parse_${name} COMMAND $<TARGET_FILE:parse_${name}> WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests)
