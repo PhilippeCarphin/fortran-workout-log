@@ -37,7 +37,7 @@ program parse_workout_test
         stop 1
     endif
 
-    call print_workout(w)
+    call print_workout(error_unit, w)
     ierr = 0
 end program
 

@@ -244,27 +244,29 @@ module workout_mod
             ierr = 0
         end subroutine
 
-        subroutine print_workout_history(wh)
+        subroutine print_workout_history(out_unit, wh)
+            integer, intent(in) :: out_unit
             type(workout_history), intent(in) :: wh
 
             integer :: iw
 
             do iw=1,size(wh%workouts, 1)
-                call print_workout(wh%workouts(iw))
+                call print_workout(out_unit, wh%workouts(iw))
             enddo
         end subroutine
 
-        subroutine print_workout(w)
+        subroutine print_workout(out_unit, w)
+            integer, intent(in) :: out_unit
             type(workout), intent(in) :: w
 
             integer :: iex
 
-            write(error_unit,*) "============================================"
+            write(out_unit,*) "============================================"
 
-            write(error_unit,*) "workout on "//w%info%date//" for "//w%info%main_group
+            write(out_unit,*) "workout on "//w%info%date//" for "//w%info%main_group
 
             do iex=1,size(w%exercises,1)
-                call print_exercise(error_unit, w%exercises(iex))
+                call print_exercise(out_unit, w%exercises(iex))
             end do
         end subroutine
 
@@ -274,9 +276,9 @@ module workout_mod
 
             integer :: nb_sets, iset
 
-            write(error_unit, '(a)') "exercise name: "//ex%info%name//" ("//ex%info%group//")"
+            write(out_unit, '(a)') "exercise name: "//ex%info%name//" ("//ex%info%group//")"
             do iset = 1, size(ex%sets, 1)
-                write(error_unit,*) "weight: ", ex%sets(iset)%weight, "reps", ex%sets(iset)%reps
+                write(out_unit,*) "weight: ", ex%sets(iset)%weight, "reps", ex%sets(iset)%reps
             end do
 
         end subroutine

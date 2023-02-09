@@ -14,7 +14,7 @@ program parse_workout_history_test
         stop 1
     endif
 
-    call print_workout_history(wh)
+    call print_workout_history(error_unit, wh)
 
     ierr = 0
 end program
