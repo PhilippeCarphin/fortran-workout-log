@@ -7,9 +7,9 @@ module workout_mod
     contains
 
         subroutine load_workout_history_file(filename, wh, ierr)
-            character(len=*) :: filename
-            type(workout_history) :: wh
-            integer :: ierr
+            character(len=*), intent(in) :: filename
+            type(workout_history), intent(out) :: wh
+            integer, intent(out):: ierr
 
             type(json_value), pointer :: jwh
             type(json_file) :: jfile
@@ -44,8 +44,8 @@ module workout_mod
         end subroutine
 
         subroutine parse_workout_history(jwh, wh, ierr)
-            type(json_value), pointer :: jwh
-            type(workout_history) :: wh
+            type(json_value), pointer, intent(in) :: jwh
+            type(workout_history), intent(out) :: wh
             integer, intent(out) :: ierr
 
             type(json_core) :: jcore
@@ -77,9 +77,9 @@ module workout_mod
 
         subroutine parse_workout(jw, w, ierr)
 
-            type(json_value), pointer :: jw
-            type(workout) :: w
-            integer :: ierr
+            type(json_value), pointer, intent(in) :: jw
+            type(workout), intent(out) :: w
+            integer, intent(out) :: ierr
 
             type(json_core) :: jcore
             type(json_value), pointer :: jwinfo, jexcs, jexc
@@ -124,8 +124,8 @@ module workout_mod
         end subroutine
 
         subroutine parse_workout_info(jwinfo, wi, ierr)
-            type(json_value), pointer :: jwinfo
-            type(workout_info) :: wi
+            type(json_value), pointer, intent(in) :: jwinfo
+            type(workout_info), intent(out) :: wi
             integer, intent(out) :: ierr
 
             type(json_core) :: jcore
@@ -149,8 +149,8 @@ module workout_mod
         end subroutine
 
         subroutine parse_exercise(jexc, exc, ierr)
-            type(json_value), pointer :: jexc
-            type(exercise) :: exc
+            type(json_value), pointer, intent(in) :: jexc
+            type(exercise), intent(out) :: exc
             integer, intent(out) :: ierr
 
             type(json_core) :: jcore
@@ -245,7 +245,8 @@ module workout_mod
         end subroutine
 
         subroutine print_workout_history(wh)
-            type(workout_history) :: wh
+            type(workout_history), intent(in) :: wh
+
             integer :: iw
 
             do iw=1,size(wh%workouts, 1)
@@ -254,7 +255,7 @@ module workout_mod
         end subroutine
 
         subroutine print_workout(w)
-            type(workout) :: w
+            type(workout), intent(in) :: w
 
             integer :: iex
 
@@ -268,8 +269,9 @@ module workout_mod
         end subroutine
 
         subroutine print_exercise(out_unit, ex)
-            integer :: out_unit
-            type(exercise) :: ex
+            integer, intent(in) :: out_unit
+            type(exercise), intent(in) :: ex
+
             integer :: nb_sets, iset
 
             write(error_unit, '(a)') "exercise name: "//ex%info%name//" ("//ex%info%group//")"
