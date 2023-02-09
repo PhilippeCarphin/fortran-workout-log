@@ -1,13 +1,15 @@
 module workout_types
 
+    use json_kinds
+
     type :: exercise_set
         real :: weight
         integer :: reps
     end type
 
     type :: exercise_info
-        character(len=:), allocatable :: name
-        character(len=:), allocatable :: group
+        character(kind=CK, len=:), allocatable :: name
+        character(kind=CK, len=:), allocatable :: group
     end type
 
     type :: exercise
@@ -16,8 +18,8 @@ module workout_types
     end type
 
     type :: workout_info
-        character(len=:), allocatable :: date
-        character(len=:), allocatable :: main_group
+        character(kind=CK, len=:), allocatable :: date
+        character(kind=CK, len=:), allocatable :: main_group
     end type
 
     type :: workout
