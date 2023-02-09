@@ -1,11 +1,11 @@
 program main
     use iso_fortran_env
-    use workout_history
+    use workout_mod
     implicit none
     integer :: ierr
     character(len=4096) :: home_dir
     integer :: length
-    type(workouthistory) :: wh
+    type(workout_history) :: wh
 
     call get_environment_variable("HOME", value=home_dir, length=length, status=ierr)
     if(ierr .ne. 0) then

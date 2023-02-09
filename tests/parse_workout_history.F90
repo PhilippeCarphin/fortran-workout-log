@@ -1,12 +1,12 @@
 program parse_workout_history_test
     use json_module
-    use workout_history
+    use workout_mod
     use, intrinsic :: iso_fortran_env
     implicit none
 
     integer :: ierr
 
-    type(workouthistory) :: wh
+    type(workout_history) :: wh
 
     call load_workout_history_file(FILENAME, wh, ierr)
     if(ierr .ne. 0) then

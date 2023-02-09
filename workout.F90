@@ -1,4 +1,4 @@
-module workout_history
+module workout_mod
     use json_module
     use, intrinsic :: iso_fortran_env
     use workout_types
@@ -8,7 +8,7 @@ module workout_history
 
         subroutine load_workout_history_file(filename, wh, ierr)
             character(len=*) :: filename
-            type(workouthistory) :: wh
+            type(workout_history) :: wh
             integer :: ierr
 
             type(json_value), pointer :: jwh
@@ -45,7 +45,7 @@ module workout_history
 
         subroutine parse_workout_history(jwh, wh, ierr)
             type(json_value), pointer :: jwh
-            type(workouthistory) :: wh
+            type(workout_history) :: wh
             integer, intent(out) :: ierr
 
             type(json_core) :: jcore
@@ -125,7 +125,7 @@ module workout_history
 
         subroutine parse_workout_info(jwinfo, wi, ierr)
             type(json_value), pointer :: jwinfo
-            type(workoutinfo) :: wi
+            type(workout_info) :: wi
             integer, intent(out) :: ierr
 
             type(json_core) :: jcore
@@ -195,7 +195,7 @@ module workout_history
 
         subroutine parse_exercise_info(jeinfo, ei, ierr)
             type(json_value), pointer :: jeinfo
-            type(exerciseinfo), intent(out) :: ei
+            type(exercise_info), intent(out) :: ei
             integer, intent(out) :: ierr
 
             type(json_core) :: jcore
@@ -221,7 +221,7 @@ module workout_history
 
         subroutine parse_set(jset, es, ierr)
             type(json_value), intent(in), pointer :: jset
-            type(exerciseset), intent(out)        :: es
+            type(exercise_set), intent(out)        :: es
             integer, intent(out)                  :: ierr
 
             type(json_core) :: jcore
@@ -245,7 +245,7 @@ module workout_history
         end subroutine
 
         subroutine print_workout_history(wh)
-            type(workouthistory) :: wh
+            type(workout_history) :: wh
             integer :: iw
 
             do iw=1,size(wh%workouts, 1)

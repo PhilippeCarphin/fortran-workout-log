@@ -1,31 +1,31 @@
 module workout_types
 
-    type :: exerciseset
+    type :: exercise_set
         real :: weight
         integer :: reps
     end type
 
-    type :: exerciseinfo
+    type :: exercise_info
         character(len=:), allocatable :: name
         character(len=:), allocatable :: group
     end type
 
     type :: exercise
-        type(exerciseinfo) :: info
-        type(exerciseset), dimension(:), allocatable :: sets
+        type(exercise_info) :: info
+        type(exercise_set), dimension(:), allocatable :: sets
     end type
 
-    type :: workoutinfo
+    type :: workout_info
         character(len=:), allocatable :: date
         character(len=:), allocatable :: main_group
     end type
 
     type :: workout
-        type(workoutinfo) :: info
+        type(workout_info) :: info
         type(exercise), dimension(:), allocatable :: exercises
     end type
 
-    type :: workouthistory
+    type :: workout_history
         type(workout), dimension(:), allocatable :: workouts
         type(workout) :: ongoing_workout
         logical :: has_ongoing_workout

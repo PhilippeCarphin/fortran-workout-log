@@ -1,5 +1,5 @@
 program parse_workout_test
-    use workout_history
+    use workout_mod
     use json_module
     use, intrinsic :: iso_fortran_env
     implicit none

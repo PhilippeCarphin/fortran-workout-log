@@ -1,5 +1,5 @@
 program test_parse_set
-    use workout_history
+    use workout_mod
     use json_module
     use, intrinsic :: iso_fortran_env
 
@@ -7,7 +7,7 @@ program test_parse_set
     integer :: ierr
     logical :: found
 
-    type(exerciseset) :: es
+    type(exercise_set) :: es
     type(json_value), pointer :: jset
 
     type(json_file) :: jfile
