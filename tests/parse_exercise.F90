@@ -1,16 +1,16 @@
-PROGRAM parse_exercise_test
+program parse_exercise_test
     use workout_history
     use json_module
     use, intrinsic :: iso_fortran_env
     implicit none
 
     integer :: ierr
-    LOGICAL :: found
+    logical :: found
 
     type(json_file) :: jfile
     type(json_value), pointer :: jexc
     type(json_core) :: jcore
-    TYPE(Exercise) :: exc
+    type(exercise) :: exc
 
     call jfile%initialize()
     if (jfile%failed()) then
@@ -32,9 +32,9 @@ PROGRAM parse_exercise_test
 
     call parse_exercise(jexc, exc, ierr)
     if(ierr .ne. 0) then
-        write(error_unit,*) "Error parsing exercise"
+        write(error_unit,*) "error parsing exercise"
         stop 1
     endif
 
     call print_exercise(error_unit, exc)
-END PROGRAM
+end program

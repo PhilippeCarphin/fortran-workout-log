@@ -1,34 +1,34 @@
-MODULE workout_types
+module workout_types
 
-    TYPE :: ExerciseSet
+    type :: exerciseset
         real :: weight
         integer :: reps
-    END TYPE
+    end type
 
-    TYPE :: ExerciseInfo
-        character(len=:), ALLOCATABLE :: name
-        character(len=:), ALLOCATABLE :: group
-    END TYPE
+    type :: exerciseinfo
+        character(len=:), allocatable :: name
+        character(len=:), allocatable :: group
+    end type
 
-    TYPE :: Exercise
-        TYPE(ExerciseInfo) :: info
-        TYPE(ExerciseSet), dimension(:), ALLOCATABLE :: sets
-    END TYPE
+    type :: exercise
+        type(exerciseinfo) :: info
+        type(exerciseset), dimension(:), allocatable :: sets
+    end type
 
-    TYPE :: WorkoutInfo
-        character(len=:), ALLOCATABLE :: date
-        character(len=:), ALLOCATABLE :: main_group
-    END TYPE
+    type :: workoutinfo
+        character(len=:), allocatable :: date
+        character(len=:), allocatable :: main_group
+    end type
 
-    TYPE :: Workout
-        TYPE(WorkoutInfo) :: info
-        TYPE(Exercise), dimension(:), ALLOCATABLE :: exercises
-    END TYPE
+    type :: workout
+        type(workoutinfo) :: info
+        type(exercise), dimension(:), allocatable :: exercises
+    end type
 
-    TYPE :: WorkoutHistory
-        TYPE(Workout), dimension(:), ALLOCATABLE :: workouts
-        TYPE(Workout) :: ongoing_workout
-        LOGICAL :: has_ongoing_workout
-    END TYPE
+    type :: workouthistory
+        type(workout), dimension(:), allocatable :: workouts
+        type(workout) :: ongoing_workout
+        logical :: has_ongoing_workout
+    end type
 
-END MODULE
+end module

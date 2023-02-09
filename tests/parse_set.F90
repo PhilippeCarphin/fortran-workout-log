@@ -1,14 +1,14 @@
-PROGRAM test_parse_set
+program test_parse_set
     use workout_history
     use json_module
     use, intrinsic :: iso_fortran_env
 
     implicit none
     integer :: ierr
-    LOGICAL :: found
+    logical :: found
 
-    TYPE(ExerciseSet) :: es
-    TYPE(json_value), pointer :: jset
+    type(exerciseset) :: es
+    type(json_value), pointer :: jset
 
     type(json_file) :: jfile
     type(json_core) :: jcore
@@ -33,7 +33,7 @@ PROGRAM test_parse_set
 
     call parse_set(jset, es, ierr)
     if(ierr .ne. 0) then
-        write(error_unit,*) "Error parsing json set"
+        write(error_unit,*) "error parsing json set"
         stop 1
     endif
 
@@ -43,4 +43,4 @@ PROGRAM test_parse_set
 
 
 
-END PROGRAM
+end program
