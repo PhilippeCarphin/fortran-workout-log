@@ -18,6 +18,6 @@ program main
         write(error_unit,*) "error loading file"
         stop 1
     endif
-    call print_workout_history(error_unit, wh)
+    call print_workout_history(output_unit, wh)
 
 end
